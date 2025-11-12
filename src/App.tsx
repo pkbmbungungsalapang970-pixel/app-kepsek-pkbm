@@ -34,6 +34,8 @@ interface ProcessedAttendance extends Attendance {
   processedPhoto?: string | null;
 }
 
+const USERS = [{ nama: "RAJAMUDDIN, S.PD.I", nip: "198106132025211014" }];
+
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<"data" | "monthlyRecap">(
     "data"
@@ -62,7 +64,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (currentPage === "data") {
       setIsPolling(true);
-      fetchAttendanceData(false);
+      fetchAttendanceData(true);
 
       const pollingInterval = setInterval(() => {
         fetchAttendanceData(false);
@@ -145,10 +147,9 @@ const App: React.FC = () => {
     e.preventDefault();
     setLoginError("");
 
-    if (
-      username.toUpperCase() === "RAJAMUDDIN, S.PD.I" &&
-      nip === "198106132025211014"
-    ) {
+    const user = USERS.find((u) => u.nama === username && u.nip === nip);
+
+    if (user) {
       setIsLoggedIn(true);
     } else {
       setLoginError("Nama atau NIP salah. Silakan coba lagi.");
@@ -1267,13 +1268,25 @@ const App: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Nama
                 </label>
-                <input
-                  type="text"
+                <select
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => {
+                    const selectedUser = USERS.find(
+                      (u) => u.nama === e.target.value
+                    );
+                    setUsername(e.target.value);
+                    setNip(selectedUser ? selectedUser.nip : "");
+                  }}
                   className="w-full p-2 border border-gray-300 rounded-lg"
                   required
-                />
+                >
+                  <option value="">Pilih Nama</option>
+                  {USERS.map((user) => (
+                    <option key={user.nip} value={user.nama}>
+                      {user.nama}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1282,9 +1295,9 @@ const App: React.FC = () => {
                 <input
                   type="text"
                   value={nip}
-                  onChange={(e) => setNip(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                  required
+                  readOnly
+                  className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100"
+                  placeholder="NIP akan terisi otomatis"
                 />
               </div>
               {loginError && (
