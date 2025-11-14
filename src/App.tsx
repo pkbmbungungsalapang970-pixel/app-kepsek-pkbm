@@ -60,11 +60,17 @@ const App: React.FC = () => {
   const [username, setUsername] = useState("");
   const [nip, setNip] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
     if (currentPage === "data") {
       setIsPolling(true);
-      fetchAttendanceData(true);
+
+      // ✅ Hanya fetch jika belum pernah dimuat
+      if (!isDataLoaded) {
+        fetchAttendanceData(true);
+        setIsDataLoaded(true); // Tandai sudah dimuat
+      }
 
       const pollingInterval = setInterval(() => {
         fetchAttendanceData(false);
@@ -75,7 +81,7 @@ const App: React.FC = () => {
         setIsPolling(false);
       };
     }
-  }, [currentPage]);
+  }, [currentPage, isDataLoaded]);
 
   useEffect(() => {
     if (currentPage === "monthlyRecap") {
@@ -161,6 +167,7 @@ const App: React.FC = () => {
     setUsername("");
     setNip("");
     setLoginError("");
+    setAttendanceData([]); //
   };
 
   const renderDataPage = () => {
